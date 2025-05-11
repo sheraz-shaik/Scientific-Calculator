@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Scientific Calculator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<style>
+    :root {
+        --bg-color: #0a0a12;
+        --panel-color: #121220;
+        --button-color: #1e1e2e;
+        --button-hover: #2a2a3a;
+        --text-color: #e0e0ff;
+        --accent-color: #00f0ff;
+        --accent-color2: #ff00f0;
+        --accent-gradient: linear-gradient(45deg, var(--accent-color) 0%, var(--accent-color2) 100%);
+        --shadow: 8px 8px 16px rgba(0, 0, 0, 0.5),
+            -8px -8px 16px rgba(100, 100, 150, 0.1);
+        --inner-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.5),
+            inset -5px -5px 10px rgba(100, 100, 150, 0.1);
+        --border-glow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Orbitron', 'Segoe UI', sans-serif;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: var(--bg-color);
+        color: var(--text-color);
+        overflow: hidden;
+    }
+
+    .calculator-container {
+        position: relative;
+        width: 800px;
+        height: 450px;
+        padding: 25px;
+        border-radius: 25px;
+        background: var(--panel-color);
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(0, 240, 255, 0.2);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .calculator-container::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: var(--accent-gradient);
+        animation: rotate 20s linear infinite;
+        z-index: -1;
+        opacity: 0.15;
+    }
+
+    @keyframes rotate {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .display-container {
+        position: relative;
+        width: 100%;
+        height: 120px;
+        margin-bottom: 20px;
+        border-radius: 15px;
+        background: rgba(10, 10, 20, 0.7);
+        box-shadow: var(--inner-shadow);
+        border: 1px solid rgba(0, 240, 255, 0.1);
+        overflow: hidden;
+    }
+
+    .display-container::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--accent-gradient);
+        box-shadow: var(--border-glow);
+    }
+
+    #screen {
+        width: 100%;
+        height: 60%;
+        border: none;
+        outline: none;
+        background: transparent;
+        color: var(--text-color);
+        font-size: 36px;
+        text-align: right;
+        padding: 10px 20px;
+        font-family: 'Orbitron', sans-serif;
+        letter-spacing: 2px;
+        pointer-events: none;
+    }
+
+    #history {
+        width: 100%;
+        height: 40%;
+        padding: 5px 20px;
+        font-size: 16px;
+        text-align: right;
+        color: rgba(224, 224, 255, 0.7);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .button-grid {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        grid-gap: 10px;
+        height: calc(100% - 140px);
+    }
+
+    button {
+        position: relative;
+        border: none;
+        border-radius: 10px;
+        background: var(--button-color);
+        color: var(--text-color);
+        font-size: 18px;
+        font-weight: 500;
+        cursor: pointer;
+        box-shadow: var(--shadow);
+        transition: all 0.2s ease;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Orbitron', sans-serif;
+    }
+
+    button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--accent-gradient);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    button:hover {
+        transform: translateY(-3px);
+        box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.5),
+            -10px -10px 20px rgba(100, 100, 150, 0.1);
+    }
+
+    button:active {
+        transform: translateY(0);
+        box-shadow: var(--inner-shadow);
+    }
+
+    button:hover::before {
+        opacity: 0.2;
+    }
+
+    .btn-number {
+        background: #1a1a2e;
+    }
+
+    .btn-operator {
+        background: #2a2a4a;
+    }
+
+    .btn-func {
+        background: #25253a;
+        font-size: 16px;
+    }
+
+    .btn-equals {
+        background: var(--accent-gradient);
+        color: white;
+        font-weight: bold;
+        grid-column: span 2;
+    }
+
+    .btn-clear {
+        background: linear-gradient(45deg, #ff4d4d, #ff3333);
+    }
+
+    .btn-del {
+        background: linear-gradient(45deg, #ff9933, #ff8000);
+    }
+
+    .btn-mem {
+        background: linear-gradient(45deg, #4d4dff, #3333ff);
+    }
+
+    .btn-shift {
+        background: linear-gradient(45deg, #9933ff, #8000ff);
+    }
+
+    .btn-const {
+        background: linear-gradient(45deg, #33cc33, #00b300);
+    }
+
+    .btn-adv {
+        background: linear-gradient(45deg, #ff33cc, #ff00b3);
+    }
+
+    .tooltip {
+        position: absolute;
+        top: -40px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+        white-space: nowrap;
+        z-index: 10;
+    }
+
+    button:hover .tooltip {
+        opacity: 1;
+    }
+
+    .shift-active {
+        background: linear-gradient(45deg, #6600cc, #4d0099);
+        box-shadow: var(--inner-shadow);
+    }
+
+    .memory-indicator {
+        position: absolute;
+        top: 10px;
+        left: 15px;
+        font-size: 14px;
+        color: var(--accent-color);
+        display: none;
+    }
+
+    .mode-indicator {
+        position: absolute;
+        top: 10px;
+        left: 50px;
+        font-size: 14px;
+        color: var(--accent-color2);
+    }
+
+    .button-icon {
+        margin-right: 5px;
+    }
+
+    .button-label {
+        font-size: 14px;
+    }
+
+    .button-sup {
+        position: relative;
+        top: -0.5em;
+        font-size: 0.7em;
+    }
+
+    .shift-hidden {
+        display: none;
+    }
+</style>
+
+<body>
+    <div class="calculator-container">
+        <div class="display-container">
+            <div class="memory-indicator" id="memory-indicator">M</div>
+            <div class="mode-indicator" id="mode-indicator">DEG</div>
+            <div id="history"></div>
+            <input id="screen" type="text" value="0" readonly>
+        </div>
+        <div class="button-grid">
+            <!-- First Row - Special Functions -->
+            <button class="btn-shift" id="shift" onclick="toggleShift()">
+                <i class="fas fa-arrow-up button-icon"></i>
+                <span class="tooltip">Shift Functions</span>
+            </button>
+            <button class="btn-func" onclick="calculate('Math.sin')" id="sin-btn">
+                <span class="button-label">sin</span>
+                <span class="tooltip">Sine</span>
+            </button>
+            <button class="btn-func" onclick="calculate('Math.cos')" id="cos-btn">
+                <span class="button-label">cos</span>
+                <span class="tooltip">Cosine</span>
+            </button>
+            <button class="btn-func" onclick="calculate('Math.tan')" id="tan-btn">
+                <span class="button-label">tan</span>
+                <span class="tooltip">Tangent</span>
+            </button>
+            <button class="btn-func shift-hidden" onclick="calculate('Math.asin')" id="asin-btn">
+                <span class="button-label">sin<span class="button-sup">-1</span></span>
+                <span class="tooltip">Inverse Sine</span>
+            </button>
+            <button class="btn-func shift-hidden" onclick="calculate('Math.acos')" id="acos-btn">
+                <span class="button-label">cos<span class="button-sup">-1</span></span>
+                <span class="tooltip">Inverse Cosine</span>
+            </button>
+            <button class="btn-func shift-hidden" onclick="calculate('Math.atan')" id="atan-btn">
+                <span class="button-label">tan<span class="button-sup">-1</span></span>
+                <span class="tooltip">Inverse Tangent</span>
+            </button>
+            <button class="btn-del" onclick="backspace()">
+                <i class="fas fa-backspace button-icon"></i>
+                <span class="tooltip">Backspace</span>
+            </button>
+            <button class="btn-clear" onclick="clearScreen()">
+                <i class="fas fa-eraser button-icon"></i>
+                <span class="tooltip">Clear All</span>
+            </button>
+            <button class="btn-mem" onclick="memoryClear()" id="mc-btn">
+                <span class="button-label">MC</span>
+                <span class="tooltip">Memory Clear</span>
+            </button>
+
+            <!-- Second Row - Advanced Math -->
+            <button class="btn-const" onclick="insertConstant('Math.PI')">
+                <span class="button-label">π</span>
+                <span class="tooltip">Pi (3.1416)</span>
+            </button>
+            <button class="btn-const" onclick="insertConstant('Math.E')">
+                <span class="button-label">e</span>
+                <span class="tooltip">Euler's Number (2.7183)</span>
+            </button>
+            <button class="btn-func" onclick="calculate('Math.log10')">
+                <span class="button-label">log</span>
+                <span class="tooltip">Logarithm Base 10</span>
+            </button>
+            <button class="btn-func" onclick="calculate('Math.log')">
+                <span class="button-label">ln</span>
+                <span class="tooltip">Natural Logarithm</span>
+            </button>
+            <button class="btn-func" onclick="calculate('Math.sqrt')">
+                <span class="button-label">√</span>
+                <span class="tooltip">Square Root</span>
+            </button>
+            <button class="btn-func" onclick="calculate('Math.pow(10,')">
+                <span class="button-label">10<span class="button-sup">x</span></span>
+                <span class="tooltip">Power of 10</span>
+            </button>
+            <button class="btn-func" onclick="calculate('Math.pow(2,')">
+                <span class="button-label">2<span class="button-sup">x</span></span>
+                <span class="tooltip">Power of 2</span>
+            </button>
+            <button class="btn-func" onclick="calculate('Math.pow(')">
+                <span class="button-label">x<span class="button-sup">y</span></span>
+                <span class="tooltip">Power Function</span>
+            </button>
+            <button class="btn-mem" onclick="memoryRecall()" id="mr-btn">
+                <span class="button-label">MR</span>
+                <span class="tooltip">Memory Recall</span>
+            </button>
+            <button class="btn-mem" onclick="memoryAdd()" id="m-plus-btn">
+                <span class="button-label">M+</span>
+                <span class="tooltip">Memory Add</span>
+            </button>
+
+            <!-- Third Row - Operators and Numbers -->
+            <button class="btn-func" onclick="appendToScreen('(')">
+                <span class="button-label">(</span>
+                <span class="tooltip">Open Parenthesis</span>
+            </button>
+            <button class="btn-func" onclick="appendToScreen(')')">
+                <span class="button-label">)</span>
+                <span class="tooltip">Close Parenthesis</span>
+            </button>
+            <button class="btn-func" onclick="calculate('factorial')">
+                <span class="button-label">x!</span>
+                <span class="tooltip">Factorial</span>
+            </button>
+            <button class="btn-func" onclick="calculate('1/')">
+                <span class="button-label">1/x</span>
+                <span class="tooltip">Reciprocal</span>
+            </button>
+            <button class="btn-operator" onclick="appendToScreen('/')">
+                <span class="button-label">÷</span>
+                <span class="tooltip">Division</span>
+            </button>
+            <button class="btn-number" onclick="appendToScreen('7')">7</button>
+            <button class="btn-number" onclick="appendToScreen('8')">8</button>
+            <button class="btn-number" onclick="appendToScreen('9')">9</button>
+            <button class="btn-operator" onclick="appendToScreen('*')">
+                <span class="button-label">×</span>
+                <span class="tooltip">Multiplication</span>
+            </button>
+            <button class="btn-mem" onclick="memorySubtract()" id="m-minus-btn">
+                <span class="button-label">M-</span>
+                <span class="tooltip">Memory Subtract</span>
+            </button>
+
+            <!-- Fourth Row - Operators and Numbers -->
+            <button class="btn-adv" onclick="calculate('Math.abs')">
+                <span class="button-label">|x|</span>
+                <span class="tooltip">Absolute Value</span>
+            </button>
+            <button class="btn-adv" onclick="appendToScreen('Math.random()')">
+                <span class="button-label">RAND</span>
+                <span class="tooltip">Random Number</span>
+            </button>
+            <button class="btn-adv" onclick="appendToScreen('**2')">
+                <span class="button-label">x<span class="button-sup">2</span></span>
+                <span class="tooltip">Square</span>
+            </button>
+            <button class="btn-adv" onclick="appendToScreen('**3')">
+                <span class="button-label">x<span class="button-sup">3</span></span>
+                <span class="tooltip">Cube</span>
+            </button>
+            <button class="btn-operator" onclick="percentage()">
+                <span class="button-label">%</span>
+                <span class="tooltip">Percentage</span>
+            </button>
+            <button class="btn-number" onclick="appendToScreen('4')">4</button>
+            <button class="btn-number" onclick="appendToScreen('5')">5</button>
+            <button class="btn-number" onclick="appendToScreen('6')">6</button>
+            <button class="btn-operator" onclick="appendToScreen('-')">
+                <span class="button-label">-</span>
+                <span class="tooltip">Subtraction</span>
+            </button>
+            <button class="btn-adv" onclick="toggleAngleMode()" id="angle-mode-btn">
+                <span class="button-label" id="angle-mode-label">DEG</span>
+                <span class="tooltip">Toggle Angle Mode</span>
+            </button>
+
+            <!-- Fifth Row - Operators and Numbers -->
+            <button class="btn-adv" onclick="calculate('Math.exp')">
+                <span class="button-label">e<span class="button-sup">x</span></span>
+                <span class="tooltip">Exponential</span>
+            </button>
+            <button class="btn-adv" onclick="calculate('Math.sinh')" id="sinh-btn">
+                <span class="button-label">sinh</span>
+                <span class="tooltip">Hyperbolic Sine</span>
+            </button>
+            <button class="btn-adv" onclick="calculate('Math.cosh')" id="cosh-btn">
+                <span class="button-label">cosh</span>
+                <span class="tooltip">Hyperbolic Cosine</span>
+            </button>
+            <button class="btn-adv" onclick="calculate('Math.tanh')" id="tanh-btn">
+                <span class="button-label">tanh</span>
+                <span class="tooltip">Hyperbolic Tangent</span>
+            </button>
+            <button class="btn-operator" onclick="appendToScreen('+')">
+                <span class="button-label">+</span>
+                <span class="tooltip">Addition</span>
+            </button>
+            <button class="btn-number" onclick="appendToScreen('1')">1</button>
+            <button class="btn-number" onclick="appendToScreen('2')">2</button>
+            <button class="btn-number" onclick="appendToScreen('3')">3</button>
+            <button class="btn-equals" onclick="calculateResult()">
+                <span class="button-label">=</span>
+                <span class="tooltip">Calculate</span>
+            </button>
+            <button class="btn-adv" onclick="calculate('Math.floor')">
+                <span class="button-label">⌊x⌋</span>
+                <span class="tooltip">Floor Function</span>
+            </button>
+
+            <!-- Sixth Row - Bottom Buttons -->
+            <button class="btn-adv" onclick="calculate('Math.ceil')">
+                <span class="button-label">⌈x⌉</span>
+                <span class="tooltip">Ceiling Function</span>
+            </button>
+            <button class="btn-adv shift-hidden" onclick="calculate('Math.asinh')" id="asinh-btn">
+                <span class="button-label">sinh<span class="button-sup">-1</span></span>
+                <span class="tooltip">Inverse Hyperbolic Sine</span>
+            </button>
+            <button class="btn-adv shift-hidden" onclick="calculate('Math.acosh')" id="acosh-btn">
+                <span class="button-label">cosh<span class="button-sup">-1</span></span>
+                <span class="tooltip">Inverse Hyperbolic Cosine</span>
+            </button>
+            <button class="btn-adv shift-hidden" onclick="calculate('Math.atanh')" id="atanh-btn">
+                <span class="button-label">tanh<span class="button-sup">-1</span></span>
+                <span class="tooltip">Inverse Hyperbolic Tangent</span>
+            </button>
+            <button class="btn-adv" onclick="calculate('toDegrees')">
+                <span class="button-label">toDeg</span>
+                <span class="tooltip">Radians to Degrees</span>
+            </button>
+            <button class="btn-number" onclick="appendToScreen('0')">0</button>
+            <button class="btn-number" onclick="appendToScreen('.')">.</button>
+            <button class="btn-adv" onclick="calculate('toRadians')">
+                <span class="button-label">toRad</span>
+                <span class="tooltip">Degrees to Radians</span>
+            </button>
+            <button class="btn-adv" onclick="calculate('Math.sign')">
+                <span class="button-label">sign</span>
+                <span class="tooltip">Sign Function</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const screen = document.getElementById('screen');
+        const historyDisplay = document.getElementById('history');
+        const memoryIndicator = document.getElementById('memory-indicator');
+        const modeIndicator = document.getElementById('mode-indicator');
+        const angleModeLabel = document.getElementById('angle-mode-label');
+        
+        let memoryValue = null;
+        let isShiftActive = false;
+        let angleMode = 'DEG'; // DEG or RAD
+        let lastResult = null;
+
+        // Initialize the calculator
+        function init() {
+            updateShiftButtons();
+            updateAngleMode();
+        }
+
+        // Toggle shift state
+        function toggleShift() {
+            isShiftActive = !isShiftActive;
+            document.getElementById('shift').classList.toggle('shift-active');
+            updateShiftButtons();
+        }
+
+        // Update button visibility based on shift state
+        function updateShiftButtons() {
+            const shiftHiddenButtons = document.querySelectorAll('.shift-hidden');
+            shiftHiddenButtons.forEach(btn => {
+                btn.style.display = isShiftActive ? 'block' : 'none';
+            });
+
+            // Update main function buttons
+            document.getElementById('sin-btn').textContent = isShiftActive ? 'sin⁻¹' : 'sin';
+            document.getElementById('cos-btn').textContent = isShiftActive ? 'cos⁻¹' : 'cos';
+            document.getElementById('tan-btn').textContent = isShiftActive ? 'tan⁻¹' : 'tan';
+            document.getElementById('sinh-btn').textContent = isShiftActive ? 'sinh⁻¹' : 'sinh';
+            document.getElementById('cosh-btn').textContent = isShiftActive ? 'cosh⁻¹' : 'cosh';
+            document.getElementById('tanh-btn').textContent = isShiftActive ? 'tanh⁻¹' : 'tanh';
+        }
+
+        // Toggle angle mode between degrees and radians
+        function toggleAngleMode() {
+            angleMode = angleMode === 'DEG' ? 'RAD' : 'DEG';
+            updateAngleMode();
+        }
+
+        function updateAngleMode() {
+            angleModeLabel.textContent = angleMode;
+            modeIndicator.textContent = angleMode;
+        }
+
+        // Convert angle based on current mode
+        function convertAngle(angle) {
+            return angleMode === 'DEG' ? angle * Math.PI / 180 : angle;
+        }
+
+        // Convert result from radians to degrees if needed
+        function convertResult(result) {
+            return angleMode === 'DEG' ? result * 180 / Math.PI : result;
+        }
+
+        // Append value to screen
+        function appendToScreen(value) {
+            if (screen.value === '0' && value !== '.') {
+                screen.value = value;
+            } else {
+                screen.value += value;
+            }
+        }
+
+        // Clear the screen
+        function clearScreen() {
+            screen.value = '0';
+            historyDisplay.textContent = '';
+        }
+
+        // Backspace function
+        function backspace() {
+            if (screen.value.length === 1) {
+                screen.value = '0';
+            } else {
+                screen.value = screen.value.slice(0, -1);
+            }
+        }
+
+        // Calculate result
+        function calculateResult() {
+            try {
+                lastResult = eval(screen.value);
+                historyDisplay.textContent = screen.value + ' =';
+                screen.value = lastResult;
+            } catch (error) {
+                screen.value = 'Error';
+                setTimeout(() => clearScreen(), 1000);
+            }
+        }
+
+        // Special calculations
+        function calculate(func) {
+            try {
+                let expression = screen.value;
+                
+                if (func === 'factorial') {
+                    const num = parseFloat(expression);
+                    if (num < 0) throw "Negative factorial";
+                    if (num % 1 !== 0) throw "Non-integer factorial";
+                    let result = 1;
+                    for (let i = 2; i <= num; i++) result *= i;
+                    screen.value = result;
+                } 
+                else if (func === '1/') {
+                    screen.value = `1/(${expression})`;
+                    calculateResult();
+                } 
+                else if (func === 'toDegrees') {
+                    screen.value = `${expression} * 180 / Math.PI`;
+                    calculateResult();
+                }
+                else if (func === 'toRadians') {
+                    screen.value = `${expression} * Math.PI / 180`;
+                    calculateResult();
+                }
+                else if (func.startsWith('Math.pow(')) {
+                    if (func === 'Math.pow(') {
+                        screen.value = `Math.pow(${expression},`;
+                    } else {
+                        screen.value = func + expression + ')';
+                        calculateResult();
+                    }
+                } 
+                else if (func === 'Math.sin' || func === 'Math.cos' || func === 'Math.tan') {
+                    if (isShiftActive) {
+                        // Handle inverse functions
+                        if (func === 'Math.sin') func = 'Math.asin';
+                        if (func === 'Math.cos') func = 'Math.acos';
+                        if (func === 'Math.tan') func = 'Math.atan';
+                        toggleShift(); // Auto-toggle shift off after use
+                        screen.value = `convertResult(${func}(${expression}))`;
+                    } else {
+                        screen.value = `${func}(convertAngle(${expression}))`;
+                    }
+                    calculateResult();
+                }
+                else if (func === 'Math.sinh' || func === 'Math.cosh' || func === 'Math.tanh') {
+                    if (isShiftActive) {
+                        // Handle inverse hyperbolic functions
+                        if (func === 'Math.sinh') func = 'Math.asinh';
+                        if (func === 'Math.cosh') func = 'Math.acosh';
+                        if (func === 'Math.tanh') func = 'Math.atanh';
+                        toggleShift(); // Auto-toggle shift off after use
+                    }
+                    screen.value = `${func}(${expression})`;
+                    calculateResult();
+                }
+                else {
+                    screen.value = func + '(' + expression + ')';
+                    calculateResult();
+                }
+            } catch (error) {
+                screen.value = 'Error';
+                setTimeout(() => clearScreen(), 1000);
+            }
+        }
+
+        // Insert constant
+        function insertConstant(constant) {
+            if (screen.value === '0') {
+                screen.value = constant;
+            } else {
+                screen.value += constant;
+            }
+        }
+
+        // Percentage calculation
+        function percentage() {
+            try {
+                const expression = screen.value;
+                const result = eval(expression) / 100;
+                screen.value = result;
+            } catch (error) {
+                screen.value = 'Error';
+                setTimeout(() => clearScreen(), 1000);
+            }
+        }
+
+        // Memory functions
+        function memoryAdd() {
+            try {
+                const currentValue = eval(screen.value);
+                memoryValue = memoryValue ? memoryValue + currentValue : currentValue;
+                memoryIndicator.style.display = 'block';
+            } catch (error) {
+                screen.value = 'Error';
+                setTimeout(() => clearScreen(), 1000);
+            }
+        }
+
+        function memorySubtract() {
+            try {
+                const currentValue = eval(screen.value);
+                memoryValue = memoryValue ? memoryValue - currentValue : -currentValue;
+                memoryIndicator.style.display = 'block';
+            } catch (error) {
+                screen.value = 'Error';
+                setTimeout(() => clearScreen(), 1000);
+            }
+        }
+
+        function memoryRecall() {
+            if (memoryValue !== null) {
+                screen.value = memoryValue;
+            }
+        }
+
+        function memoryClear() {
+            memoryValue = null;
+            memoryIndicator.style.display = 'none';
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            const key = e.key;
+            
+            if (/[0-9.]/.test(key)) {
+                appendToScreen(key);
+            } 
+            else if (/[+\-*/]/.test(key)) {
+                appendToScreen(key);
+            } 
+            else if (key === 'Enter') {
+                calculateResult();
+            } 
+            else if (key === 'Escape') {
+                clearScreen();
+            } 
+            else if (key === 'Backspace') {
+                backspace();
+            } 
+            else if (key === '%') {
+                percentage();
+            } 
+            else if (key === '(' || key === ')') {
+                appendToScreen(key);
+            } 
+            else if (key === '!') {
+                calculate('factorial');
+            }
+            else if (key === '^') {
+                calculate('Math.pow(');
+            }
+            else if (key === 'p' && e.ctrlKey) {
+                insertConstant('Math.PI');
+            }
+            else if (key === 'e' && e.ctrlKey) {
+                insertConstant('Math.E');
+            }
+        });
+
+        // Initialize calculator
+        init();
+    </script>
+</body>
+</html>
