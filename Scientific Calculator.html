@@ -10,19 +10,35 @@
 </head>
 <style>
     :root {
-        --bg-color: #0a0a12;
-        --panel-color: #121220;
-        --button-color: #1e1e2e;
-        --button-hover: #2a2a3a;
-        --text-color: #e0e0ff;
-        --accent-color: #00f0ff;
-        --accent-color2: #ff00f0;
-        --accent-gradient: linear-gradient(45deg, var(--accent-color) 0%, var(--accent-color2) 100%);
-        --shadow: 8px 8px 16px rgba(0, 0, 0, 0.5),
-            -8px -8px 16px rgba(100, 100, 150, 0.1);
-        --inner-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.5),
-            inset -5px -5px 10px rgba(100, 100, 150, 0.1);
-        --border-glow: 0 0 10px rgba(0, 240, 255, 0.3);
+        /* Dark Blue Theme */
+        --bg-color-blue: #0a0a1a;
+        --panel-color-blue: #12122a;
+        --button-color-blue: #1e1e3a;
+        --button-hover-blue: #2a2a4a;
+        --text-color-blue: #e0e0ff;
+        --accent-color-blue: #4a8cff;
+        --border-color-blue: #2a3a5a;
+        
+        /* Dark Gray Theme */
+        --bg-color-gray: #121212;
+        --panel-color-gray: #1e1e1e;
+        --button-color-gray: #2a2a2a;
+        --button-hover-gray: #3a3a3a;
+        --text-color-gray: #f0f0f0;
+        --accent-color-gray: #6a6a6a;
+        --border-color-gray: #3a3a3a;
+        
+        /* Active Theme (default to blue) */
+        --bg-color: var(--bg-color-blue);
+        --panel-color: var(--panel-color-blue);
+        --button-color: var(--button-color-blue);
+        --button-hover: var(--button-hover-blue);
+        --text-color: var(--text-color-blue);
+        --accent-color: var(--accent-color-blue);
+        --border-color: var(--border-color-blue);
+        
+        --shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
+        --inner-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.3);
     }
 
     * {
@@ -45,60 +61,48 @@
     .calculator-container {
         position: relative;
         width: 800px;
-        height: 450px;
+        height: 480px; /* Increased height to accommodate theme button */
         padding: 25px;
-        border-radius: 25px;
+        border-radius: 15px;
         background: var(--panel-color);
         box-shadow: var(--shadow);
-        border: 1px solid rgba(0, 240, 255, 0.2);
+        border: 1px solid var(--border-color);
         display: flex;
         flex-direction: column;
-        overflow: hidden;
     }
 
-    .calculator-container::before {
-        content: '';
+    .theme-toggle-container {
         position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: var(--accent-gradient);
-        animation: rotate 20s linear infinite;
-        z-index: -1;
-        opacity: 0.15;
+        top: 10px;
+        right: 20px;
+        z-index: 10;
     }
 
-    @keyframes rotate {
-        0% {
-            transform: rotate(0deg);
-        }
-        100% {
-            transform: rotate(360deg);
-        }
+    .theme-toggle {
+        background: var(--button-color);
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.2s;
+    }
+
+    .theme-toggle:hover {
+        background: var(--button-hover);
     }
 
     .display-container {
         position: relative;
         width: 100%;
         height: 120px;
-        margin-bottom: 20px;
-        border-radius: 15px;
+        margin: 30px 0 20px 0; /* Added top margin for theme button */
+        border-radius: 10px;
         background: rgba(10, 10, 20, 0.7);
         box-shadow: var(--inner-shadow);
-        border: 1px solid rgba(0, 240, 255, 0.1);
+        border: 1px solid var(--border-color);
         overflow: hidden;
-    }
-
-    .display-container::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 2px;
-        background: var(--accent-gradient);
-        box-shadow: var(--border-glow);
     }
 
     #screen {
@@ -131,14 +135,14 @@
     .button-grid {
         display: grid;
         grid-template-columns: repeat(10, 1fr);
-        grid-gap: 10px;
-        height: calc(100% - 140px);
+        grid-gap: 8px;
+        height: calc(100% - 170px); /* Adjusted for new layout */
     }
 
     button {
         position: relative;
         border: none;
-        border-radius: 10px;
+        border-radius: 8px;
         background: var(--button-color);
         color: var(--text-color);
         font-size: 18px;
@@ -151,24 +155,12 @@
         justify-content: center;
         align-items: center;
         font-family: 'Orbitron', sans-serif;
-    }
-
-    button::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: var(--accent-gradient);
-        opacity: 0;
-        transition: opacity 0.2s ease;
+        border: 1px solid var(--border-color);
     }
 
     button:hover {
-        transform: translateY(-3px);
-        box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.5),
-            -10px -10px 20px rgba(100, 100, 150, 0.1);
+        background: var(--button-hover);
+        transform: translateY(-2px);
     }
 
     button:active {
@@ -176,52 +168,48 @@
         box-shadow: var(--inner-shadow);
     }
 
-    button:hover::before {
-        opacity: 0.2;
-    }
-
     .btn-number {
-        background: #1a1a2e;
+        background: var(--button-color);
     }
 
     .btn-operator {
-        background: #2a2a4a;
+        background: var(--button-hover);
     }
 
     .btn-func {
-        background: #25253a;
+        background: var(--button-color);
         font-size: 16px;
     }
 
     .btn-equals {
-        background: var(--accent-gradient);
+        background: var(--accent-color);
         color: white;
         font-weight: bold;
         grid-column: span 2;
     }
 
     .btn-clear {
-        background: linear-gradient(45deg, #ff4d4d, #ff3333);
+        background: #3a1e1e;
     }
 
     .btn-del {
-        background: linear-gradient(45deg, #ff9933, #ff8000);
+        background: #3a2a1e;
     }
 
     .btn-mem {
-        background: linear-gradient(45deg, #4d4dff, #3333ff);
+        background: #1e1e3a;
     }
 
     .btn-shift {
-        background: linear-gradient(45deg, #9933ff, #8000ff);
+        background: #2a1e3a;
     }
 
     .btn-const {
-        background: linear-gradient(45deg, #33cc33, #00b300);
+        background: #1e3a1e;
     }
 
     .btn-adv {
-        background: linear-gradient(45deg, #ff33cc, #ff00b3);
+        background: #3a1e3a;
     }
 
     .tooltip {
@@ -246,7 +234,7 @@
     }
 
     .shift-active {
-        background: linear-gradient(45deg, #6600cc, #4d0099);
+        background: #1e1e2a;
         box-shadow: var(--inner-shadow);
     }
 
@@ -264,7 +252,7 @@
         top: 10px;
         left: 50px;
         font-size: 14px;
-        color: var(--accent-color2);
+        color: var(--accent-color);
     }
 
     .button-icon {
@@ -288,6 +276,9 @@
 
 <body>
     <div class="calculator-container">
+        <div class="theme-toggle-container">
+            <button class="theme-toggle" id="theme-toggle">Switch to Gray Theme</button>
+        </div>
         <div class="display-container">
             <div class="memory-indicator" id="memory-indicator">M</div>
             <div class="mode-indicator" id="mode-indicator">DEG</div>
@@ -518,16 +509,48 @@
         const memoryIndicator = document.getElementById('memory-indicator');
         const modeIndicator = document.getElementById('mode-indicator');
         const angleModeLabel = document.getElementById('angle-mode-label');
+        const themeToggle = document.getElementById('theme-toggle');
         
         let memoryValue = null;
         let isShiftActive = false;
         let angleMode = 'DEG'; // DEG or RAD
         let lastResult = null;
+        let currentTheme = 'blue'; // 'blue' or 'gray'
 
         // Initialize the calculator
         function init() {
             updateShiftButtons();
             updateAngleMode();
+            setupThemeToggle();
+        }
+
+        // Toggle between blue and gray themes
+        function setupThemeToggle() {
+            themeToggle.addEventListener('click', () => {
+                if (currentTheme === 'blue') {
+                    // Switch to gray theme
+                    document.documentElement.style.setProperty('--bg-color', 'var(--bg-color-gray)');
+                    document.documentElement.style.setProperty('--panel-color', 'var(--panel-color-gray)');
+                    document.documentElement.style.setProperty('--button-color', 'var(--button-color-gray)');
+                    document.documentElement.style.setProperty('--button-hover', 'var(--button-hover-gray)');
+                    document.documentElement.style.setProperty('--text-color', 'var(--text-color-gray)');
+                    document.documentElement.style.setProperty('--accent-color', 'var(--accent-color-gray)');
+                    document.documentElement.style.setProperty('--border-color', 'var(--border-color-gray)');
+                    currentTheme = 'gray';
+                    themeToggle.textContent = 'Switch to Blue Theme';
+                } else {
+                    // Switch to blue theme
+                    document.documentElement.style.setProperty('--bg-color', 'var(--bg-color-blue)');
+                    document.documentElement.style.setProperty('--panel-color', 'var(--panel-color-blue)');
+                    document.documentElement.style.setProperty('--button-color', 'var(--button-color-blue)');
+                    document.documentElement.style.setProperty('--button-hover', 'var(--button-hover-blue)');
+                    document.documentElement.style.setProperty('--text-color', 'var(--text-color-blue)');
+                    document.documentElement.style.setProperty('--accent-color', 'var(--accent-color-blue)');
+                    document.documentElement.style.setProperty('--border-color', 'var(--border-color-blue)');
+                    currentTheme = 'blue';
+                    themeToggle.textContent = 'Switch to Gray Theme';
+                }
+            });
         }
 
         // Toggle shift state
